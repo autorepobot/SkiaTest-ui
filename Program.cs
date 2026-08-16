@@ -1,5 +1,5 @@
 using System;
-using Uno.UI.Runtime.Skia.LinuxFrameBuffer;
+using Uno.UI.Hosting;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -11,7 +11,12 @@ public class Program
     public static void Main(string[] args)
     {
         Console.WriteLine("[TEST] Starting Uno Platform Linux FrameBuffer Host...");
-        var host = new FrameBufferHost(() => new App());
+        
+        var host = UnoPlatformHostBuilder.Create()
+            .App(() => new App())
+            .UseLinuxFrameBuffer()
+            .Build();
+            
         host.Run();
     }
 }
