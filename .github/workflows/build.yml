@@ -1,0 +1,84 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Purge SDKs
+        shell: pwsh
+        run: |
+          echo "Before:"
+          dotnet --list-sdks
+          
+          dotnet --list-sdks | % {
+            $_ -match '^\S+\s+\[(.+)\]$' > $null
+            $d = Join-Path $Matches[1] $_.Split()[0]
+            Write-Host "Removing $d"
+            if ($IsWindows) { rm $d -r -fo } else { sudo rm -rf "$d" }
+          }
+          
+          echo "After:"
+          dotnet --list-sdks 2>$null; $LASTEXITCODE=0
+
+      - name: Setup .NET SDK 10.0.110
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.110'
+
+      - name: Download Custom ppc64le NuGet Packages
+        shell: bash
+        run: |
+          mkdir -p local-packages
+          
+          URLS=(
+            "https://github.com/autorepobot/SkiaSharp/releases/download/ppc64le-test-31909126013/HarfBuzzSharp.NativeAssets.Linux.Ppc64leTest.14.2.1-ppc64le-test.nupkg"
+            "https://github.com/autorepobot/SkiaSharp/releases/download/ppc64le-test-31909126013/SkiaSharp.NativeAssets.Linux.Ppc64leTest.4.152.0-ppc64le-test.nupkg"
+            "https://github.com/IBM/dotnet-s390x/releases/download/v10.0.110/Microsoft.AspNetCore.App.Runtime.linux-ppc64le.10.0.10.nupkg"
+            "https://github.com/IBM/dotnet-s390x/releases/download/v10.0.110/Microsoft.NETCore.App.Host.linux-ppc64le.10.0.10.nupkg"
+            "https://github.com/IBM/dotnet-s390x/releases/download/v10.0.110/Microsoft.NETCore.App.Runtime.linux-ppc64le.10.0.10.nupkg"
+            "https://github.com/IBM/dotnet-s390x/releases/download/v10.0.110/runtime.linux-ppc64le.Microsoft.NETCore.ILDAsm.10.0.10.nupkg"
+          )
+          
+          for url in "${URLS[@]}"; do
+            echo "Downloading $url..."
+            curl -sSL -O --output-dir local-packages "$url"
+          done
+
+      - name: Add Local Package Source
+        run: |
+          dotnet nuget add source ${{ github.workspace }}/local-packages --name ppc64le-local
+
+      - name: Build & Self-Contained Publish
+        run: |
+          dotnet publish -c Release -r linux-x64 --self-contained true -o ./publish/linux-x64
+          dotnet publish -c Release -r linux-arm64 --self-contained true -o ./publish/linux-arm64
+          dotnet publish -c Release -r linux-ppc64le --self-contained true -o ./publish/linux-ppc64le
+
+      - name: Create Zip Archives
+        run: |
+          cd publish/linux-x64 && zip -r ../../SkiaTestApp-linux-x64.zip . && cd ../..
+          cd publish/linux-arm64 && zip -r ../../SkiaTestApp-linux-arm64.zip . && cd ../..
+          cd publish/linux-ppc64le && zip -r ../../SkiaTestApp-linux-ppc64le.zip . && cd ../..
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            SkiaTestApp-linux-x64.zip
+            SkiaTestApp-linux-arm64.zip
+            SkiaTestApp-linux-ppc64le.zip
+          tag_name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
