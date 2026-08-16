@@ -14,6 +14,9 @@ public class Program
     {
         Console.WriteLine("[TEST] Starting Uno Platform Linux FrameBuffer Host...");
         
+        // 【关键修复】强制在内存中加载 FrameBuffer 宿主程序集，防止被裁剪或未预加载
+        _ = typeof(Uno.UI.Runtime.Skia.LinuxFrameBuffer.FrameBufferHost);
+
         var host = UnoPlatformHostBuilder.Create()
             .App(() => new App())
             .UseLinuxFrameBuffer()
@@ -46,7 +49,7 @@ public class App : Application
             };
             canvas.DrawRoundRect(new SKRect(50, 50, 450, 200), 20, 20, rectPaint);
 
-            // 3. 测试 SkiaSharp 文字渲染 (适配 SkiaSharp 4.x 的 SKFont 架构)
+            // 3. 测试 SkiaSharp 文字渲染
             using var font = new SKFont(SKTypeface.Default, 32);
             using var textPaint = new SKPaint
             {
