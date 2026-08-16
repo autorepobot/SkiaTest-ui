@@ -1,22 +1,19 @@
-<PropertyGroup>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- 关键：禁止裁剪，防止反射找不到宿主类型 -->
+    <!-- 禁止代码裁剪，确保 Linux FrameBuffer 运行时反射正常 -->
     <PublishTrimmed>false</PublishTrimmed>
-</PropertyGroup>
-    <!-- 强制全局锁定 SkiaSharp 4.0 正式版，防止依赖传递引入冲突版本 -->
-    <SkiaSharpVersion>4.151.1</SkiaSharpVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- 主框架保持你原本使用的 6.6.184 -->
+    <!-- Uno 核心与 Linux FrameBuffer 宿主 -->
     <PackageReference Include="Uno.WinUI" Version="6.6.184" />
-    
     <PackageReference Include="Uno.WinUI.Skia.Linux.FrameBuffer" Version="6.6.184" />
 
-    <!-- 显式引入 SkiaSharp 4.0 正式版及对应视图组件 -->
+    <!-- SkiaSharp 引擎及 WinUI/Uno 视图组件 -->
     <PackageReference Include="SkiaSharp" Version="4.151.1" />
     <PackageReference Include="SkiaSharp.Views.Uno.WinUI" Version="4.151.1" />
   </ItemGroup>
