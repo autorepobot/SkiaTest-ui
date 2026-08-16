@@ -1,9 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
+<PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- 关键：禁止裁剪，防止反射找不到宿主类型 -->
+    <PublishTrimmed>false</PublishTrimmed>
+</PropertyGroup>
     <!-- 强制全局锁定 SkiaSharp 4.0 正式版，防止依赖传递引入冲突版本 -->
     <SkiaSharpVersion>4.151.1</SkiaSharpVersion>
   </PropertyGroup>
