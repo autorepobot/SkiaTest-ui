@@ -3,7 +3,7 @@ using Uno.UI.Hosting;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using SkiaSharp;
-using SkiaSharp.Views.WindowsUI;
+using SkiaSharp.Views.Windows; // 修正：WinUI 平台的 SkiaSharp 视图命名空间为 SkiaSharp.Views.Windows
 
 namespace SkiaTestApp;
 
@@ -29,7 +29,6 @@ public class App : Application
     {
         Console.WriteLine("[TEST] Initializing Main Window & Skia Canvas...");
 
-        // 创建一个 SkiaSharp 专用绘图画布，用于测试底层引擎渲染
         var skiaCanvas = new SKXamlCanvas();
         skiaCanvas.PaintSurface += (s, e) =>
         {
@@ -38,7 +37,7 @@ public class App : Application
             // 1. 测试画布清屏与底色填充
             canvas.Clear(SKColors.DarkSlateBlue);
             
-            // 2. 测试 SkiaSharp 矢量图形绘制（画一个矩形）
+            // 2. 测试 SkiaSharp 矢量图形绘制
             using var rectPaint = new SKPaint
             {
                 Color = SKColors.Crimson,
@@ -64,7 +63,7 @@ public class App : Application
         {
             Children =
             {
-                skiaCanvas, // 将 Skia 画布作为底层渲染组件
+                skiaCanvas,
                 new TextBlock
                 {
                     Text = "Uno Platform FrameBuffer Mode",
