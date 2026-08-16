@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using Uno.UI.Hosting;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -14,6 +15,9 @@ public class Program
     {
         Console.WriteLine("[TEST] Starting Uno Platform Linux FrameBuffer Host...");
         
+        // 【核心修复】显式加载 Linux FrameBuffer 宿主程序集，确保反射扫描能成功发现它
+        Assembly.Load("Uno.UI.Runtime.Skia.Linux.FrameBuffer");
+
         var host = UnoPlatformHostBuilder.Create()
             .App(() => new App())
             .UseLinuxFrameBuffer()
@@ -46,7 +50,7 @@ public class App : Application
             };
             canvas.DrawRoundRect(new SKRect(50, 50, 450, 200), 20, 20, rectPaint);
 
-            // 3. 测试 SkiaSharp 文字渲染（已适配最新 SkiaSharp 4.x 的 SKTextAlign 参数）
+            // 3. 测试 SkiaSharp 文字渲染
             using var font = new SKFont(SKTypeface.Default, 32);
             using var textPaint = new SKPaint
             {
