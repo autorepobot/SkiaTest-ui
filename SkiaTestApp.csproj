@@ -4,15 +4,16 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- 禁止代码裁剪，确保 Linux FrameBuffer 运行时反射正常 -->
+    <!-- 禁止代码裁剪，确保反射正常（X11 / FrameBuffer host 探测都依赖反射） -->
     <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
-
   <ItemGroup>
-    <!-- Uno 核心与 Linux FrameBuffer 宿主 -->
+    <!-- Uno 核心 -->
     <PackageReference Include="Uno.WinUI" Version="6.6.184" />
+    <!-- X11 宿主：有图形会话（X11 或 Wayland 下的 XWayland）时使用 -->
+    <PackageReference Include="Uno.WinUI.Skia.X11" Version="6.6.184" />
+    <!-- Linux FrameBuffer 宿主：无窗口系统的无头/嵌入式场景兜底 -->
     <PackageReference Include="Uno.WinUI.Skia.Linux.FrameBuffer" Version="6.6.184" />
-
     <!-- SkiaSharp 引擎及 WinUI/Uno 视图组件 -->
     <PackageReference Include="SkiaSharp" Version="4.151.1" />
     <PackageReference Include="SkiaSharp.Views.Uno.WinUI" Version="4.151.1" />
