@@ -3,7 +3,7 @@ using Uno.UI.Hosting;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using SkiaSharp;
-using SkiaSharp.Views.Windows; // 修正：WinUI 平台的 SkiaSharp 视图命名空间为 SkiaSharp.Views.Windows
+using SkiaSharp.Views.Windows;
 
 namespace SkiaTestApp;
 
@@ -46,14 +46,14 @@ public class App : Application
             };
             canvas.DrawRoundRect(new SKRect(50, 50, 450, 200), 20, 20, rectPaint);
 
-            // 3. 测试 SkiaSharp 文字渲染
+            // 3. 测试 SkiaSharp 文字渲染 (适配 SkiaSharp 4.x 的 SKFont 架构)
+            using var font = new SKFont(SKTypeface.Default, 32);
             using var textPaint = new SKPaint
             {
                 Color = SKColors.White,
-                TextSize = 32,
                 IsAntialias = true
             };
-            canvas.DrawText("SkiaSharp Engine Active!", 80, 120, textPaint);
+            canvas.DrawText("SkiaSharp Engine Active!", 80, 120, font, textPaint);
             
             Console.WriteLine("[TEST] SUCCESS: SkiaSharp PaintSurface Event Executed!");
         };
