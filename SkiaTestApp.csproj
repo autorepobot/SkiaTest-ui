@@ -12,9 +12,8 @@
     <!-- 主框架保持你原本使用的 6.6.184 -->
     <PackageReference Include="Uno.WinUI" Version="6.6.184" />
     
-    <!-- GTK 宿主包使用存在的 5.6.99 版本 -->
-    <PackageReference Include="Uno.WinUI.Skia.Gtk" Version="5.6.99" />
-    
+    <PackageReference Include="Uno.WinUI.Skia.Linux.FrameBuffer" Version="6.6.184" />
+
     <!-- 显式引入 SkiaSharp 4.0 正式版及对应视图组件 -->
     <PackageReference Include="SkiaSharp" Version="4.151.1" />
     <PackageReference Include="SkiaSharp.Views.Uno.WinUI" Version="4.151.1" />
