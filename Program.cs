@@ -1,5 +1,5 @@
 using System;
-using Uno.UI.Runtime.Skia.Gtk;
+using Uno.UI.Runtime.Skia.LinuxFrameBuffer;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -10,8 +10,8 @@ public class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        Console.WriteLine("[TEST] Starting Uno Platform Skia.Gtk Host...");
-        var host = new GtkHost(() => new App());
+        Console.WriteLine("[TEST] Starting Uno Platform Linux FrameBuffer Host...");
+        var host = new FrameBufferHost(() => new App());
         host.Run();
     }
 }
@@ -28,7 +28,7 @@ public class App : Application
             {
                 new TextBlock
                 {
-                    Text = "SkiaSharp / Uno Window Rendered Successfully!",
+                    Text = "SkiaSharp / Uno FrameBuffer Rendered Successfully!",
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
                     FontSize = 24
@@ -36,6 +36,6 @@ public class App : Application
             }
         };
         window.Activate();
-        Console.WriteLine("[TEST] SUCCESS: Window Activated and Rendered without Exceptions!");
+        Console.WriteLine("[TEST] SUCCESS: FrameBuffer Initialized and Rendered without Exceptions!");
     }
 }
