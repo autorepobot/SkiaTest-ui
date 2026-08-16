@@ -4,11 +4,18 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- 强制全局锁定 SkiaSharp 4.0 正式版，防止依赖传递引入冲突版本 -->
+    <SkiaSharpVersion>4.151.1</SkiaSharpVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- 主框架保持你原本使用的 6.6.184 -->
     <PackageReference Include="Uno.WinUI" Version="6.6.184" />
+    
+    <!-- GTK 宿主包使用存在的 5.6.99 版本 -->
     <PackageReference Include="Uno.WinUI.Skia.Gtk" Version="5.6.99" />
+    
+    <!-- 显式引入 SkiaSharp 4.0 正式版及对应视图组件 -->
     <PackageReference Include="SkiaSharp" Version="4.151.1" />
     <PackageReference Include="SkiaSharp.Views.Uno.WinUI" Version="4.151.1" />
   </ItemGroup>
