@@ -38,7 +38,18 @@ public class App : Application
 {
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        Console.WriteLine("[TEST] Initializing Main Window & Skia Canvas...");
+        Console.WriteLine("[TEST] Initializing Main Window...");
+
+        // 【核心修复】必须先创建并 Activate() Window，
+        // 让 X11XamlRootHost 先注册好，之后再创建任何依赖
+        // DisplayInformation.GetForCurrentView() 的控件（比如 SKXamlCanvas）。
+        // 之前的写法是先 new SKXamlCanvas() 再创建 Window，
+        // 这时候还没有任何 root host，所以会抛
+        // "X11DisplayInformationExtension couldn't find a X11XamlRootHost"。
+        var window = new Window();
+        window.Activate();
+
+        Console.WriteLine("[TEST] Initializing Skia Canvas...");
 
         var skiaCanvas = new SKXamlCanvas();
         skiaCanvas.PaintSurface += (s, e) =>
@@ -69,7 +80,6 @@ public class App : Application
             Console.WriteLine("[TEST] SUCCESS: SkiaSharp PaintSurface Event Executed!");
         };
 
-        var window = new Window();
         window.Content = new Grid
         {
             Children =
@@ -86,7 +96,6 @@ public class App : Application
             }
         };
 
-        window.Activate();
         Console.WriteLine("[TEST] SUCCESS: Host Initialized and Rendered without Exceptions!");
     }
 }
