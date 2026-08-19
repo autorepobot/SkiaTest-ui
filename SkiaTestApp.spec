@@ -24,8 +24,8 @@ BuildRequires:  libXi-devel
 Uno Platform SkiaSharp test application build with headless GUI execution and screenshot validation on ppc64le.
 
 %prep
-# zip 包解压时没有顶层同名文件夹，使用 -c 创建解压目录
-%setup -q -c -n %{name}-%{version}
+# 去掉 -c 参数，避免解压出现同名嵌套目录导致 %install 路径不匹配
+%setup -q -n %{name}-%{version}
 
 %build
 # 插入第三方编译的 native .so 到程序解压目录中
@@ -64,7 +64,7 @@ SCREENSHOT_FILE="${DOC_DIR}/gui_test_screenshot.png"
 APP_PID=$!
 
 # 等待 Uno Host 窗口创建并完成 Skia 绘制
-sleep 5
+sleep 30
 
 # 3. 使用 ImageMagick 截取虚拟桌面的画面并保存为截图
 import -window root "${SCREENSHOT_FILE}" || true
@@ -87,3 +87,4 @@ echo "==================================================="
 %changelog
 * Wed Aug 19 2026 Auto Repo Bot <dev@example.com> - 1.0.0-1
 - Switch to prebuilt zip source and inject custom native libraries for ppc64le.
+- Fix directory nesting issue in %prep section.
