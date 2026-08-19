@@ -1,4 +1,4 @@
-%undefine _missing_build_ids_terminate_build
+%global debug_package %{nil}
 
 Name:           SkiaTestApp
 Version:        1.0.0
