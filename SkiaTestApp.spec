@@ -24,8 +24,8 @@ BuildRequires:  libXi-devel
 Uno Platform SkiaSharp test application build with headless GUI execution and screenshot validation on ppc64le.
 
 %prep
-# 去掉 -c 参数，避免解压出现同名嵌套目录导致 %install 路径不匹配
-%setup -q -n %{name}-%{version}
+# 必须加上 -c，因为 zip 内没有顶层文件夹；%setup 会自动创建并 cd 进入 %{name}-%{version} 目录再解压
+%setup -q -c -n %{name}-%{version}
 
 %build
 # 插入第三方编译的 native .so 到程序解压目录中
@@ -35,10 +35,12 @@ cp %{SOURCE2} .
 %install
 mkdir -p %{buildroot}%{_libexecdir}/%{name}
 mkdir -p %{buildroot}%{_bindir}
-mkdir -p %{buildroot}%{_docdir}/%{name}
 
-# 部署程序本体与链接库
+# 部署程序本体与链接库（此时当前目录在 BUILD/%{name}-%{version} 下，仅包含程序文件与 SOURCE1/2）
 cp -a ./* %{buildroot}%{_libexecdir}/%{name}/
+
+# 确保二进制具有可执行权限
+chmod +x %{buildroot}%{_libexecdir}/%{name}/SkiaTestApp
 
 # 创建可执行启动脚本并赋予权限
 cat << 'EOF' > %{buildroot}%{_bindir}/%{name}
@@ -46,7 +48,6 @@ cat << 'EOF' > %{buildroot}%{_bindir}/%{name}
 exec %{_libexecdir}/%{name}/SkiaTestApp "$@"
 EOF
 chmod +x %{buildroot}%{_bindir}/%{name}
-chmod +x %{buildroot}%{_libexecdir}/%{name}/SkiaTestApp
 
 %check
 # 1. 启动虚拟 X11 显示服务
@@ -55,9 +56,10 @@ Xvfb :99 -screen 0 1024x768x24 &
 XVFB_PID=$!
 sleep 2
 
-DOC_DIR="%{buildroot}%{_docdir}/%{name}"
-LOG_FILE="${DOC_DIR}/gui_test.log"
-SCREENSHOT_FILE="${DOC_DIR}/gui_test_screenshot.png"
+# 创建临时日志与截图输出目录
+TEST_DIR="$(mktemp -d)"
+LOG_FILE="${TEST_DIR}/gui_test.log"
+SCREENSHOT_FILE="${TEST_DIR}/gui_test_screenshot.png"
 
 # 2. 启动 GUI 应用并将终端控制台输出写入日志
 %{buildroot}%{_libexecdir}/%{name}/SkiaTestApp > "${LOG_FILE}" 2>&1 &
@@ -78,13 +80,15 @@ echo "================ Copr GUI Test Log ================"
 cat "${LOG_FILE}"
 echo "==================================================="
 
+# 清理临时文件
+rm -rf "${TEST_DIR}"
+
 %files
 %{_bindir}/%{name}
 %{_libexecdir}/%{name}/
-# 将日志与截图打入 RPM 包的文档目录 (/usr/share/doc/SkiaTestApp/)
-%doc %{_docdir}/%{name}/
 
 %changelog
 * Wed Aug 19 2026 Auto Repo Bot <dev@example.com> - 1.0.0-1
 - Switch to prebuilt zip source and inject custom native libraries for ppc64le.
-- Fix directory nesting issue in %prep section.
+- Add -c flag to %setup to build isolated dir for flat zip archive.
+- Ensure executable flags are correctly set on binary output.
