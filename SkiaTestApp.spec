@@ -20,6 +20,8 @@ BuildRequires:  ImageMagick
 BuildRequires:  fontconfig
 BuildRequires:  libX11-devel
 BuildRequires:  libXi-devel
+BuildRequires:  libicu
+Requires:       libicu
 
 %description
 Uno Platform SkiaSharp test application build with headless GUI execution and screenshot validation on ppc64le.
@@ -49,6 +51,7 @@ chmod +x %{buildroot}%{_bindir}/%{name}
 
 %check
 export DISPLAY=:99
+export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 Xvfb :99 -screen 0 1024x768x24 &
 XVFB_PID=$!
 sleep 2
@@ -71,7 +74,6 @@ echo "================ Copr GUI Test Log ================"
 cat "${LOG_FILE}"
 echo "==================================================="
 
-# 把截图和日志一并安装进 buildroot 的 doc 目录，随包一起产出
 mkdir -p %{buildroot}%{_docdir}/%{name}-tests
 if [ -s "${SCREENSHOT_FILE}" ]; then
     install -Dm644 "${SCREENSHOT_FILE}" \
@@ -84,14 +86,27 @@ install -Dm644 "${LOG_FILE}" \
 
 rm -rf "${TEST_DIR}"
 
+%package tests
+Summary:        GUI test artifacts for %{name}
+%description tests
+Contains the headless GUI smoke-test screenshot and console log
+generated during package build, for manual visual verification.
+
 %files
 %{_bindir}/%{name}
 %{_libexecdir}/%{name}/
 
-%files -f %{_builddir}/SkiaTestApp-1.0.0/filelist-tests.txt
+%files tests
+%{_docdir}/%{name}-tests/gui_test_screenshot.png
+%{_docdir}/%{name}-tests/gui_test.log
 
 %changelog
 * Wed Aug 19 2026 Auto Repo Bot <dev@example.com> - 1.0.0-1
+- Disable debuginfo generation to avoid strict build-id check failure
+  on prebuilt third-party .so files that lack build-id notes.
+- Add libicu dependency and set invariant-globalization fallback to
+  fix app crash (SIGABRT) caused by missing ICU during GUI test.
+- Fix duplicate/invalid %files declaration for SkiaTestApp package.
 - Fix source unpacking logic to support Copr Git builds with prebuilt zip deployment.
 - Explicitly inject ppc64le native libraries and set 0755 permissions.
 - Preserve GUI test screenshot and log as build artifacts for manual verification.
