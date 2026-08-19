@@ -7,11 +7,12 @@ License:        MIT
 URL:            https://github.com/autorepobot/SkiaTestApp
 ExclusiveArch:  ppc64le
 
-# 使用预编译好的 Zip 发布包
+# 说明：当 Copr/Packit 从 Git 触发构建时，Source0 会被系统自动替换为 Git 源码包；
+# 将预编译包单独定义为 Source3，可确保在任何构建环境下均能精准拉取并使用 Zip 包。
 Source0:        https://github.com/autorepobot/SkiaTest-ui/releases/download/%{version}/%{name}-linux-ppc64le.zip
-# 依赖的原生库定义为额外 Source
 Source1:        https://github.com/autorepobot/SkiaSharp/releases/download/ppc64le-test-31909126013/libHarfBuzzSharp.so
 Source2:        https://github.com/autorepobot/SkiaSharp/releases/download/ppc64le-test-31909126013/libSkiaSharp.so
+Source3:        https://github.com/autorepobot/SkiaTest-ui/releases/download/%{version}/%{name}-linux-ppc64le.zip
 
 BuildRequires:  unzip
 BuildRequires:  xorg-x11-server-Xvfb
@@ -24,25 +25,29 @@ BuildRequires:  libXi-devel
 Uno Platform SkiaSharp test application build with headless GUI execution and screenshot validation on ppc64le.
 
 %prep
-# 必须加上 -c，因为 zip 内没有顶层文件夹；%setup 会自动创建并 cd 进入 %{name}-%{version} 目录再解压
-%setup -q -c -n %{name}-%{version}
+# 进入标准的源码/构建主目录
+%setup -q -n %{name}-%{version}
+
+# 强制将预编译 Zip 包的内容解压并覆盖到当前构建目录根节点
+unzip -o %{SOURCE3} -d .
 
 %build
-# 插入第三方编译的 native .so 到程序解压目录中
-cp %{SOURCE1} .
-cp %{SOURCE2} .
+# 将第三方编译的 ppc64le native .so 覆盖/复制到程序目录中
+cp -f %{SOURCE1} .
+cp -f %{SOURCE2} .
 
 %install
 mkdir -p %{buildroot}%{_libexecdir}/%{name}
 mkdir -p %{buildroot}%{_bindir}
 
-# 部署程序本体与链接库（此时当前目录在 BUILD/%{name}-%{version} 下，仅包含程序文件与 SOURCE1/2）
+# 部署程序本体与链接库（平铺复制到安装目录）
 cp -a ./* %{buildroot}%{_libexecdir}/%{name}/
 
-# 确保二进制具有可执行权限
+# 为二进制程序及原生共享库赋予正确的可执行权限
 chmod +x %{buildroot}%{_libexecdir}/%{name}/SkiaTestApp
+chmod 0755 %{buildroot}%{_libexecdir}/%{name}/*.so
 
-# 创建可执行启动脚本并赋予权限
+# 创建可执行启动脚本
 cat << 'EOF' > %{buildroot}%{_bindir}/%{name}
 #!/bin/sh
 exec %{_libexecdir}/%{name}/SkiaTestApp "$@"
@@ -89,6 +94,5 @@ rm -rf "${TEST_DIR}"
 
 %changelog
 * Wed Aug 19 2026 Auto Repo Bot <dev@example.com> - 1.0.0-1
-- Switch to prebuilt zip source and inject custom native libraries for ppc64le.
-- Add -c flag to %setup to build isolated dir for flat zip archive.
-- Ensure executable flags are correctly set on binary output.
+- Fix source unpacking logic to support Copr Git builds with prebuilt zip deployment.
+- Explicitly inject ppc64le native libraries and set 0755 permissions.
