@@ -20,8 +20,19 @@ BuildRequires:  ImageMagick
 BuildRequires:  fontconfig
 BuildRequires:  libX11-devel
 BuildRequires:  libXi-devel
+BuildRequires:  libXrandr
+BuildRequires:  libXcursor
+BuildRequires:  libXext
+BuildRequires:  libXfixes
+BuildRequires:  libXrender
 BuildRequires:  libicu
 Requires:       libicu
+Requires:       libXrandr
+Requires:       libXi
+Requires:       libXcursor
+Requires:       libXext
+Requires:       libXfixes
+Requires:       libXrender
 
 %description
 Uno Platform SkiaSharp test application build with headless GUI execution and screenshot validation on ppc64le.
